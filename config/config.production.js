@@ -4,6 +4,7 @@ module.exports = {
   password: '7c5-fdv',
   params: {
     host: 'localhost',
-    dialect: 'mysql'
+    dialect: 'mysql',
+    port: 3306
   }
 };
