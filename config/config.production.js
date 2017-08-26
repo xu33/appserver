@@ -1,9 +1,9 @@
 module.exports = {
-  database: "chatapp",
-  username: "root",
-  password: "333333",
+  database: 'appdb',
+  username: 'root',
+  password: '7c5-fdv',
   params: {
-    host: "localhost",
-    dialect: "mysql"
+    host: 'localhost',
+    dialect: 'mysql'
   }
 };
