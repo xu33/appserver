@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     album: DataTypes.TEXT,
     birthday: DataTypes.DATE,
     sign: DataTypes.TEXT,
-    latlng: DataTypes.STRING
+    position: DataTypes.STRING
   });
 
   return User;

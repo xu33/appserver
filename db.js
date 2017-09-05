@@ -68,6 +68,7 @@ function updateUser(id, fields) {
 
 module.exports = {
   blowfishEncrypt,
+  blowfishDecrypt,
   sha1,
   createUser,
   findUser,
