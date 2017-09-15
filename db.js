@@ -98,20 +98,6 @@ async function getConversationInfo(id) {
   return result;
 }
 
-function createMessage({ userId, conversitionId, message }) {
-  return co(function*() {
-    let conversition = yield models.Conversation.findOne({
-      where: {
-        id: conversitionId
-      }
-    });
-
-    conversition.addMessage({
-      message
-    });
-  });
-}
-
 async function createMessage({ UserId, ConversationId, message }) {
   return await models.Message.create({
     message,

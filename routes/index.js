@@ -290,6 +290,45 @@ router.get("/getConversationInfo", (req, res, next) => {
   });
 });
 
+// 创建群
+router.post("/createConversation", tokenMiddleware, (req, res, next) => {
+  let title = req.body.title || "";
+  let UserId = res.locals.userId;
+  let pid = req.body.pid;
+
+  DB.createConversation({
+    UserId,
+    title,
+    pid
+  }).then(data => {
+    res.json({
+      iRet: 0,
+      data
+    });
+  });
+});
+
+// 发消息
+router.post("/createMessage", tokenMiddleware, (req, res, next) => {
+  let { message, ConversitionId } = req.body;
+  let UserId = res.locals.userId;
+
+  DB.createMessage({
+    UserId,
+    message,
+    ConversationId
+  })
+    .then(message => {
+      res.json({ iRet: 0, message: message.get({ plain: true }) });
+    })
+    .catch(err => {
+      res.json({
+        iRet: -1,
+        error: err.message
+      });
+    });
+});
+
 function tokenMiddleware(req, res, next) {
   const token = req.header("token");
 
