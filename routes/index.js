@@ -1,8 +1,8 @@
-const express = require('express');
-const multer = require('multer');
-const uuid = require('uuid/v1');
-const DB = require('../db');
-const geolib = require('geolib');
+const express = require("express");
+const multer = require("multer");
+const uuid = require("uuid/v1");
+const DB = require("../db");
+const geolib = require("geolib");
 
 const {
   blowfishEncrypt,
@@ -11,11 +11,11 @@ const {
   createUser,
   updateUser
 } = DB;
-const models = require('../models');
+const models = require("../models");
 
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, 'upload');
+    cb(null, "upload");
   },
   filename(req, file, cb) {
     cb(null, `${file.fieldname}-${uuid()}.jpg`);
@@ -27,11 +27,11 @@ let router = express.Router();
 let verifyCodeMap = new Map();
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+router.get("/", function(req, res, next) {
+  res.render("index", { title: "Express" });
 });
 
-router.post('/register', (req, res, next) => {
+router.post("/register", (req, res, next) => {
   let { phonenumber, password, verifyCode } = req.body;
 
   // if (
@@ -48,7 +48,7 @@ router.post('/register', (req, res, next) => {
   if (!phonenumber || !password) {
     res.json({
       iRet: -1,
-      msg: '参数错误'
+      msg: "参数错误"
     });
     return;
   }
@@ -59,30 +59,30 @@ router.post('/register', (req, res, next) => {
     if (created) {
       res.json({
         iRet: 0,
-        msg: '注册成功'
+        msg: "注册成功"
       });
     } else {
       res.json({
         iRet: -1,
-        msg: '用户已存在'
+        msg: "用户已存在"
       });
     }
   });
 });
 
-let SMSClient = require('@alicloud/sms-sdk');
-let accessKeyId = 'LTAIIWmvLEiGrAFm';
-let secretAccessKey = 'CjWmzSYORoquWZjkY13NWLSFWF19vG';
-let TemplateCode = 'SMS_56055145';
+let SMSClient = require("@alicloud/sms-sdk");
+let accessKeyId = "LTAIIWmvLEiGrAFm";
+let secretAccessKey = "CjWmzSYORoquWZjkY13NWLSFWF19vG";
+let TemplateCode = "SMS_56055145";
 let smsClient = new SMSClient({ accessKeyId, secretAccessKey });
 
-router.post('/requestVerifyCode', (req, res, next) => {
+router.post("/requestVerifyCode", (req, res, next) => {
   let PhoneNumbers = req.body.phonenumber;
 
   if (!PhoneNumbers || String(PhoneNumbers).length < 11) {
     res.json({
       iRet: -1,
-      msg: '参数错误'
+      msg: "参数错误"
     });
     return;
   }
@@ -94,7 +94,7 @@ router.post('/requestVerifyCode', (req, res, next) => {
   smsClient
     .sendSMS({
       PhoneNumbers: String(PhoneNumbers),
-      SignName: 'APP',
+      SignName: "APP",
       TemplateCode,
       TemplateParam: `{
         "code": ${verifyCode},
@@ -103,10 +103,10 @@ router.post('/requestVerifyCode', (req, res, next) => {
     })
     .then(response => {
       let { Code } = response;
-      if (Code === 'OK') {
+      if (Code === "OK") {
         res.json({
           iRet: 0,
-          msg: '发送成功'
+          msg: "发送成功"
         });
       } else {
         return Promise.reject(new Error(Code));
@@ -115,18 +115,18 @@ router.post('/requestVerifyCode', (req, res, next) => {
     .catch(err => {
       res.json({
         iRet: 0,
-        msg: '发送成功',
+        msg: "发送成功",
         verifyCode: verifyCode
       });
     });
 });
 
-router.post('/login', (req, res, next) => {
+router.post("/login", (req, res, next) => {
   let { phonenumber, password } = req.body;
   if (!phonenumber || !password) {
     res.json({
       iRet: -1,
-      msg: '参数错误'
+      msg: "参数错误"
     });
   }
 
@@ -134,23 +134,23 @@ router.post('/login', (req, res, next) => {
     if (!user) {
       res.json({
         iRet: -1,
-        msg: '用户名或密码错误'
+        msg: "用户名或密码错误"
       });
     } else {
       res.json({
         iRet: 0,
         token: blowfishEncrypt(
           JSON.stringify([user.id, user.password]),
-          'shaojun'
+          "shaojun"
         ),
-        msg: '登录成功'
+        msg: "登录成功"
       });
     }
   });
 });
 
 // 编辑用户资料
-router.post('/updateUser', tokenMiddleware, (req, res, next) => {
+router.post("/updateUser", tokenMiddleware, (req, res, next) => {
   const { nickname, sign, gender, birthday, album, position } = req.body;
 
   DB.updateUser(res.locals.userId, {
@@ -170,7 +170,7 @@ router.post('/updateUser', tokenMiddleware, (req, res, next) => {
       } else {
         res.json({
           iRet: -1,
-          msg: '记录不存在'
+          msg: "记录不存在"
         });
       }
     })
@@ -183,7 +183,7 @@ router.post('/updateUser', tokenMiddleware, (req, res, next) => {
 });
 
 // 获取用户资料
-router.get('/getUserInfo', tokenMiddleware, (req, res, next) => {
+router.get("/getUserInfo", tokenMiddleware, (req, res, next) => {
   models.User
     .findOne({
       where: {
@@ -196,7 +196,7 @@ router.get('/getUserInfo', tokenMiddleware, (req, res, next) => {
       if (!user) {
         res.json({
           iRet: -1,
-          msg: '用户不存在'
+          msg: "用户不存在"
         });
       } else {
         res.json({
@@ -208,7 +208,7 @@ router.get('/getUserInfo', tokenMiddleware, (req, res, next) => {
 });
 
 // 上传照片
-router.post('/upload', upload.single('photo'), (req, res, next) => {
+router.post("/upload", upload.single("photo"), (req, res, next) => {
   res.json({
     iRet: 0,
     url: req.file.filename
@@ -216,7 +216,7 @@ router.post('/upload', upload.single('photo'), (req, res, next) => {
 });
 
 // 获取附近的用户
-router.get('/getNearUsers', tokenMiddleware, (req, res, next) => {
+router.get("/getNearUsers", tokenMiddleware, (req, res, next) => {
   const distance = req.query.distance || 500;
   models.User
     .findAll({
@@ -248,10 +248,10 @@ router.get('/getNearUsers', tokenMiddleware, (req, res, next) => {
         return;
       }
 
-      let [myLatitude, myLongtude] = me.position.split(',');
+      let [myLatitude, myLongtude] = me.position.split(",");
       let result = others.filter(user => {
         if (!user.position) return false;
-        let [latitude, longitude] = user.position.split(',');
+        let [latitude, longitude] = user.position.split(",");
 
         let meter = geolib.getDistance(
           {
@@ -274,7 +274,8 @@ router.get('/getNearUsers', tokenMiddleware, (req, res, next) => {
     });
 });
 
-router.get('/getConversationInfo', (req, res, next) => {
+// 获取群信息
+router.get("/getConversationInfo", (req, res, next) => {
   DB.getConversationInfo(req.query.id).then(data => {
     if (!data) {
       res.json({
@@ -290,14 +291,14 @@ router.get('/getConversationInfo', (req, res, next) => {
 });
 
 function tokenMiddleware(req, res, next) {
-  const token = req.header('token');
+  const token = req.header("token");
 
   try {
-    var jsonString = blowfishDecrypt(token, 'shaojun');
+    var jsonString = blowfishDecrypt(token, "shaojun");
   } catch (e) {
     res.json({
       iRet: -1,
-      msg: 'token无效'
+      msg: "token无效"
     });
     return;
   }
@@ -307,7 +308,7 @@ function tokenMiddleware(req, res, next) {
   if (!token || !Array.isArray(json) || json.length < 2) {
     res.json({
       iRet: -1,
-      msg: 'token无效'
+      msg: "token无效"
     });
     return;
   }
