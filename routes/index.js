@@ -217,6 +217,7 @@ router.post('/upload', upload.single('photo'), (req, res, next) => {
 
 // 获取附近的用户
 router.get('/getNearUsers', tokenMiddleware, (req, res, next) => {
+  const distance = req.query.distance || 500;
   models.User
     .findAll({
       where: {
@@ -239,6 +240,14 @@ router.get('/getNearUsers', tokenMiddleware, (req, res, next) => {
         }
       }
 
+      if (!me.position) {
+        res.json({
+          iRet: 0,
+          data: []
+        });
+        return;
+      }
+
       let [myLatitude, myLongtude] = me.position.split(',');
       let result = others.filter(user => {
         if (!user.position) return false;
@@ -255,7 +264,7 @@ router.get('/getNearUsers', tokenMiddleware, (req, res, next) => {
           }
         );
 
-        return meter <= 500;
+        return meter <= distance;
       });
 
       res.json({
@@ -265,9 +274,35 @@ router.get('/getNearUsers', tokenMiddleware, (req, res, next) => {
     });
 });
 
+router.get('/getConversationInfo', (req, res, next) => {
+  DB.getConversationInfo(req.query.id).then(data => {
+    if (!data) {
+      res.json({
+        iRet: -1
+      });
+    } else {
+      res.json({
+        iRet: 0,
+        data: data
+      });
+    }
+  });
+});
+
 function tokenMiddleware(req, res, next) {
-  const token = req.query.token || req.body.token;
-  const json = JSON.parse(blowfishDecrypt(token, 'shaojun'));
+  const token = req.header('token');
+
+  try {
+    var jsonString = blowfishDecrypt(token, 'shaojun');
+  } catch (e) {
+    res.json({
+      iRet: -1,
+      msg: 'token无效'
+    });
+    return;
+  }
+
+  const json = JSON.parse(jsonString);
 
   if (!token || !Array.isArray(json) || json.length < 2) {
     res.json({

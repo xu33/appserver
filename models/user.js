@@ -10,5 +10,11 @@ module.exports = (sequelize, DataTypes) => {
     position: DataTypes.STRING
   });
 
+  User.associate = function(models) {
+    User.belongsToMany(models.Conversation, {
+      through: 'UserConversation'
+    });
+  };
+
   return User;
 };

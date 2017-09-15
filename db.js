@@ -1,6 +1,7 @@
 const models = require('./models');
 const crypto = require('crypto');
 const key = 'shaojun';
+const co = require('co');
 
 // DES 加密
 function blowfishEncrypt(message, key) {
@@ -19,8 +20,13 @@ function blowfishDecrypt(text, key) {
     key.length >= 8 ? key.slice(0, 8) : key.concat('0'.repeat(8 - key.length));
   const keyHex = new Buffer(key);
   const cipher = crypto.createDecipheriv('blowfish', keyHex, keyHex);
-  let c = cipher.update(text, 'base64', 'utf8');
-  c += cipher.final('utf8');
+  try {
+    var c = cipher.update(text, 'base64', 'utf8');
+    c += cipher.final('utf8');
+  } catch (e) {
+    throw new Error('decrypt error');
+  }
+
   return c;
 }
 
@@ -66,11 +72,58 @@ function updateUser(id, fields) {
   });
 }
 
+function getConversationInfo(id) {
+  return co(function*() {
+    let conversition = yield models.Conversation.findOne({
+      where: {
+        id
+      }
+    });
+
+    if (!conversition) {
+      return null;
+    }
+
+    let manager = yield models.User.findOne({
+      where: {
+        id: conversition.creator_id
+      }
+    });
+
+    if (!manager) {
+      return null;
+    }
+
+    let members = yield conversition.getUsers();
+
+    return {
+      conversition,
+      manager,
+      members
+    };
+  });
+}
+
+function createMessage({ userId, conversitionId, message }) {
+  return co(function*() {
+    let conversition = yield models.Conversation.findOne({
+      where: {
+        id: conversitionId
+      }
+    });
+
+    conversition.addMessage({
+      message
+    });
+  });
+}
+
 module.exports = {
   blowfishEncrypt,
   blowfishDecrypt,
   sha1,
   createUser,
   findUser,
-  updateUser
+  updateUser,
+  getConversationInfo
 };

@@ -23,7 +23,7 @@ var server = http.createServer(app);
 
 const models = require('../models');
 
-models.sequelize.sync({ force: false }).then(() => {
+models.sequelize.sync({ force: true }).then(() => {
   /**
  * Listen on provided port, on all network interfaces.
  */
