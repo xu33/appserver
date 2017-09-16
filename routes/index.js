@@ -310,7 +310,7 @@ router.post("/createConversation", tokenMiddleware, (req, res, next) => {
 
 // 发消息
 router.post("/createMessage", tokenMiddleware, (req, res, next) => {
-  let { message, ConversitionId } = req.body;
+  let { message, ConversationId } = req.body;
   let UserId = res.locals.userId;
 
   DB.createMessage({
