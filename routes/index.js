@@ -329,6 +329,24 @@ router.post("/createMessage", tokenMiddleware, (req, res, next) => {
     });
 });
 
+// 获取消息
+router.get("/getMessages", tokenMiddleware, (req, res, next) => {
+  let { ConversationId } = req.query;
+
+  DB.getMessages({
+    ConversationId
+  })
+    .then(messages => {
+      res.json({ iRet: 0, messages });
+    })
+    .catch(err => {
+      res.json({
+        iRet: -1,
+        error: err.message
+      });
+    });
+});
+
 function tokenMiddleware(req, res, next) {
   const token = req.header("token");
 

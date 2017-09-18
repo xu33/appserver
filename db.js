@@ -125,6 +125,21 @@ async function createConversation({ UserId, title, pid }) {
   return conversation.get({ plain: true });
 }
 
+// 获取群消息
+async function getMessages({ ConversationId }) {
+  const messages = await models.Message.findAll({
+    where: {
+      ConversationId
+    },
+    attributes: ["message"],
+    include: [
+      { model: models.User, attributes: ["phonenumber", "nickname", "album"] }
+    ]
+  });
+
+  return messages.map(msg => msg.get({ plain: true }));
+}
+
 module.exports = {
   blowfishEncrypt,
   blowfishDecrypt,
@@ -134,5 +149,6 @@ module.exports = {
   updateUser,
   getConversationInfo,
   createMessage,
-  createConversation
+  createConversation,
+  getMessages
 };
