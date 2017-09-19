@@ -125,7 +125,7 @@ async function createConversation({ UserId, title, pid }) {
 
 // 获取群消息
 async function getMessages({ ConversationId }) {
-  const messages = await models.Message.findAll({
+  let messages = await models.Message.findAll({
     where: {
       ConversationId
     },
@@ -135,14 +135,29 @@ async function getMessages({ ConversationId }) {
     ]
   });
 
-  const conversations = await models.Message.findAll({
-    where: {
-      pid: ConversationId
-    },
-    attributes: ['title']
+  let conversations = await models.Conversation.findAll({
+    where: { pid: ConversationId },
+    attributes: ['title'],
+    include: [
+      {
+        model: models.User,
+        as: 'creator',
+        attributes: ['id', 'nickname', 'album']
+      },
+      {
+        model: models.User,
+        attributes: ['id', 'nickname', 'album']
+      }
+    ]
   });
 
-  return messages.map(msg => msg.get({ plain: true }));
+  conversations = conversations.map(c => c.get({ plain: true }));
+  messages = messages.map(msg => msg.get({ plain: true }));
+
+  conversations.forEach(c => (c.type = 1));
+  messages.forEach(c => (c.type = 0));
+
+  return [...messages, ...conversations];
 }
 
 module.exports = {

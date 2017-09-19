@@ -29,25 +29,28 @@ const db = require('./db');
   //   console.log(e);
   // }
 
-  let arr = await models.Conversation.findAll({
-    where: {
-      id: 1
-    },
-    attributes: ['title'],
-    include: [
-      {
-        model: models.User,
-        as: 'creator',
-        attributes: ['id', 'nickname', 'album']
-      },
-      {
-        model: models.User,
-        attributes: ['id', 'nickname', 'album']
-      }
-    ]
-  });
+  // let arr = await models.Conversation.findAll({
+  //   where: {
+  //     id: 1
+  //   },
+  //   attributes: ['title'],
+  //   include: [
+  //     {
+  //       model: models.User,
+  //       as: 'creator',
+  //       attributes: ['id', 'nickname', 'album']
+  //     },
+  //     {
+  //       model: models.User,
+  //       attributes: ['id', 'nickname', 'album']
+  //     }
+  //   ]
+  // });
 
-  arr = arr.map(o => o.get({ plain: true }));
+  // arr = arr.map(o => o.get({ plain: true }));
 
-  console.log(util.inspect(arr, false, 5));
+  // console.log(util.inspect(arr, false, 5));
+
+  let result = await db.getMessages({ ConversationId: 1 });
+  console.log(result);
 })();
